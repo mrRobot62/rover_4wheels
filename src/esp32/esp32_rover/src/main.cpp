@@ -5,6 +5,26 @@
 #include <Dynamixel2Arduino.h>
 #include <Vector.h>
 
+/************************************************************************************
+ * 
+ * ROS2 ESP32 Komponente
+ * 
+ * Der ESP32 baut einen Wifi  UDP-Socket Verbindung auf und stellt diese dann
+ * dem Python-Rover modul für die Kommunikation zur Verfügung
+ * 
+ * Später soll die Verbindung statt UDP über RS485 stattfinden, da die Möglichkeit
+ * geschaffen werden soll, an einen Python-Node mehrere ESP32 andocken zu können
+ * 
+ * die Datenübertragung muss sehr schnell sein, daher ist bei Wifi UDP eine gute wahl
+ * ein HTTP-Socket ist zu langsam
+ * 
+ * 
+ * 
+ ***********************************************************************************/
+
+ /** 
+  * verfügbare SSID zur Kopplung definieren
+  */
 #define WIFI_SSID "FRITZ!Box 7590 UL"        // WLAN-SSID
 #define WIFI_PASSWORD "95493765313007016133" // WLAN-Passwort
 
@@ -22,6 +42,7 @@ const float DXL_PROTOCOL = 1.0;
 
 int servo_angle = 0; //
 
+/* statische IP-Adresse, damit sichergestellt wird, das der ESP32 grundsätzlich immer mit der gleichen IP angesprochen werden kann*/
 IPAddress staticIP(192, 168, 0, 199); // Statische IP-Adresse
 IPAddress gateway(192, 168, 0, 1);
 IPAddress subnet(255, 255, 255, 0);
@@ -77,6 +98,7 @@ void setup()
   DEBUG_SERIAL.printf("UDP Server gestartet auf Port %d\n", localUdpPort);
 
   // Dynamixel-Scan
+  // alle gefundenen Servos erst einmal auf MODE: OP_POSTION setzen (Winkel 0-300Grad)
   scanDynamixels(dynaList, OP_POSITION);
 }
 
@@ -114,8 +136,10 @@ void scanDynamixels(TDynaList &list, uint8_t opMode)
       {
         DEBUG_SERIAL.printf("ID (%3d), Model: %3d\n", id, dxl.getModelNumber(id));
         dynaList.push_back(id);
+        // um den MODE zu setzen muss vorher TORQUE deaktiviert werden
         dxl.torqueOff(id);
         dxl.setOperatingMode(id, opMode);
+        // um den Servo zu bewegen muss TORQUE wieder aktiviert werden
         dxl.torqueOn(id);
       }
     }
@@ -126,7 +150,8 @@ void scanDynamixels(TDynaList &list, uint8_t opMode)
 /**
  * @brief Eingehende UDP-Nachricht verarbeiten
  * IncommingMessage ist ein Steuerbefehl für die Motoren
- *
+ * und wird vom Python-Node versendet.
+ * 
  */
 void handleIncomingMessage(String msg)
 {
