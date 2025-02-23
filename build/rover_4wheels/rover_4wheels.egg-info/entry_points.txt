@@ -1,0 +1,2 @@
+[console_scripts]
+rover_node = rover_4wheels.Rover:main

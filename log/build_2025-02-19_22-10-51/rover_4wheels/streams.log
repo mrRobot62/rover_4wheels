@@ -1,0 +1,21 @@
+[1.506s] Invoking command in '/home/bernd/ros2_ws/rover_4wheels': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/bernd/ros2_ws/rover_4wheels/build/rover_4wheels/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/bernd/ros2_ws/rover_4wheels/install/rover_4wheels/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base build/rover_4wheels build --build-base /home/bernd/ros2_ws/rover_4wheels/build/rover_4wheels/build install --record /home/bernd/ros2_ws/rover_4wheels/build/rover_4wheels/install.log --single-version-externally-managed install_data
+[1.988s] running egg_info
+[2.028s] writing build/rover_4wheels/rover_4wheels.egg-info/PKG-INFO
+[2.028s] writing dependency_links to build/rover_4wheels/rover_4wheels.egg-info/dependency_links.txt
+[2.028s] writing entry points to build/rover_4wheels/rover_4wheels.egg-info/entry_points.txt
+[2.029s] writing requirements to build/rover_4wheels/rover_4wheels.egg-info/requires.txt
+[2.029s] writing top-level names to build/rover_4wheels/rover_4wheels.egg-info/top_level.txt
+[2.109s] reading manifest file 'build/rover_4wheels/rover_4wheels.egg-info/SOURCES.txt'
+[2.110s] writing manifest file 'build/rover_4wheels/rover_4wheels.egg-info/SOURCES.txt'
+[2.111s] running build
+[2.111s] running build_py
+[2.111s] running install
+[2.121s] running install_lib
+[2.163s] running install_data
+[2.163s] running install_egg_info
+[2.206s] removing '/home/bernd/ros2_ws/rover_4wheels/install/rover_4wheels/lib/python3.12/site-packages/rover_4wheels-0.0.0-py3.12.egg-info' (and everything under it)
+[2.206s] Copying build/rover_4wheels/rover_4wheels.egg-info to /home/bernd/ros2_ws/rover_4wheels/install/rover_4wheels/lib/python3.12/site-packages/rover_4wheels-0.0.0-py3.12.egg-info
+[2.208s] running install_scripts
+[2.467s] Installing rover_node script to /home/bernd/ros2_ws/rover_4wheels/install/rover_4wheels/lib/rover_4wheels
+[2.468s] writing list of installed files to '/home/bernd/ros2_ws/rover_4wheels/build/rover_4wheels/install.log'
+[2.547s] Invoked command in '/home/bernd/ros2_ws/rover_4wheels' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/bernd/ros2_ws/rover_4wheels/build/rover_4wheels/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/bernd/ros2_ws/rover_4wheels/install/rover_4wheels/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base build/rover_4wheels build --build-base /home/bernd/ros2_ws/rover_4wheels/build/rover_4wheels/build install --record /home/bernd/ros2_ws/rover_4wheels/build/rover_4wheels/install.log --single-version-externally-managed install_data
