@@ -4,6 +4,8 @@
 #include <ArduinoJson.h>
 #include <Dynamixel2Arduino.h>
 #include <Vector.h>
+#include "rover.h"
+#include "rover_utils.h"
 
 /************************************************************************************
  * 
@@ -22,17 +24,13 @@
  * 
  ***********************************************************************************/
 
- /** 
-  * verfügbare SSID zur Kopplung definieren
-  */
-#define WIFI_SSID "FRITZ!Box 7590 UL"        // WLAN-SSID
-#define WIFI_PASSWORD "95493765313007016133" // WLAN-Passwort
+#define TEST_VL
+//#define TEST_HL
+//#define TEST_VR
+//#define TEST_HR
 
-// Dynamixel-Konfiguration
-#define DXL_SERIAL Serial1  // Dynamixel auf Serial1
-#define DEBUG_SERIAL Serial // Debug auf Serial0
-#define DXL_DIR_PIN 4       // GPIO für Dynamixel-Richtung
-#define DXL_BROADCAST_ID 254
+
+
 
 // Dynamixel Commands
 #define DXL_
@@ -63,9 +61,11 @@ char buffer[200];
 // Dynamixel-Objekt
 Dynamixel2Arduino dxl(DXL_SERIAL, DXL_DIR_PIN);
 
-void scanDynamixels(TDynaList &list, uint8_t opMode = OP_POSITION);
+//void scanDynamixels(TDynaList &list, uint8_t opMode = OP_POSITION);
+bool scanDynamixels();
 void handleIncomingMessage(String msg);
 void publishSensorData();
+void goStartPosition();
 
 void setup()
 {
@@ -74,13 +74,46 @@ void setup()
   while (!DEBUG_SERIAL)
     ;
 
+  delay(2000) ; // warten um VSCode zeit zu geben den Monitor zu öffnen
+
   // Dynamixel starten
   DXL_SERIAL.begin(DXL_BAUDRATE, SERIAL_8N1, 16, 17);
   dxl.begin(DXL_BAUDRATE);
   dxl.setPortProtocolVersion(DXL_PROTOCOL);
 
-  delay(1000);
+  delay(500);
+
+  resetAllServos(&dxl);
+
+  // Dynamixel-Scan
+  // alle gefundenen Servos erst einmal auf MODE: OP_POSTION setzen (Winkel 0-300Grad)
+  //scanDynamixels(dynaList, OP_POSITION);
+  if (!scanDynamixels()) {
+    DEBUG_SERIAL.println("SERVO-Liste falsch konfiguriert. Angegebene Servos nicht gefunden.");
+    while(true) {delay(1000);DEBUG_SERIAL.print("ERROR ");}
+  }
+
   DEBUG_SERIAL.println("Dynamixel gestartet!");
+
+  // die Servo-Limits werden imm EEPROM des Servos gespeichert um zu vermeiden,
+  // das versehentlich das Limit überschritten wird und der Servo beschädigt wird (oder anderes)
+  // for (uint8_t id = 0; id < ARRAY_SIZE(dxl_ids_steering); id++) {
+  //   saveAngleLimits(&dxl, 
+  //     dxl_ids_steering[id], 0, 300
+  //     // dxl_id_steering_range[id][0], // min
+  //     // dxl_id_steering_range[id][1]  // max
+  //   );
+  //   DEBUG_SERIAL.printf("Limit Servo (%02d) MIN(%3.1f), MAX(%3.1f)\n", 
+  //     dxl_ids_steering[id],
+  //     dxl_id_steering_range[id][0], // min
+  //     dxl_id_steering_range[id][1]  // max
+  //   );
+  // }
+
+  goStartPosition();
+  DEBUG_SERIAL.println("Antriebseinheiten in Startposition");
+
+  printCurrentAngles(&dxl);
 
   // WLAN verbinden
   WiFi.config(staticIP, gateway, subnet, primaryDNS, secondDNS); // Statische IP einstellen
@@ -97,9 +130,7 @@ void setup()
   udp.begin(localUdpPort);
   DEBUG_SERIAL.printf("UDP Server gestartet auf Port %d\n", localUdpPort);
 
-  // Dynamixel-Scan
-  // alle gefundenen Servos erst einmal auf MODE: OP_POSTION setzen (Winkel 0-300Grad)
-  scanDynamixels(dynaList, OP_POSITION);
+
 }
 
 void loop()
@@ -123,28 +154,109 @@ void loop()
   publishSensorData();
 }
 
+// /**
+//  * @brief Scan für Dynamixels. Wenn gefunden, werden die IDs in eine Liste aufgenommen.
+//  */
+// void scanDynamixels(TDynaList &list, uint8_t opMode)
+// {
+//   if (dynaList.size() < DXL_BROADCAST_ID)
+//   {
+//     for (uint8_t id = 0; id < DXL_BROADCAST_ID; id++)
+//     {
+//       if (dxl.ping(id))
+//       {
+//         DEBUG_SERIAL.printf("ID (%3d), Model: %3d\n", id, dxl.getModelNumber(id));
+//         dynaList.push_back(id);
+//         // um den MODE zu setzen muss vorher TORQUE deaktiviert werden
+//         dxl.torqueOff(id);
+//         dxl.setOperatingMode(id, opMode);
+//         // um den Servo zu bewegen muss TORQUE wieder aktiviert werden
+//         dxl.torqueOn(id);
+//       }
+//     }
+//     DEBUG_SERIAL.printf("Number of Dynamixels found: {%3d}\n", dynaList.size());
+//   }
+// }
+
 /**
- * @brief Scan für Dynamixels. Wenn gefunden, werden die IDs in eine Liste aufgenommen.
+ * @brief Scannt die Dynamixel-Kette und sucht ob die definierten IDs auch verfügbar sind.
+ * Wenn nein liefert die Funktion false zurück. Wurde ein Serve gefunden, wird auch direkt der
+ * Mode für diesen Servo gesetzt. OP_VELOCITY (für Antriebsservos), OP_POSITION (für lenkservos)
+ * 
  */
-void scanDynamixels(TDynaList &list, uint8_t opMode)
-{
-  if (dynaList.size() < DXL_BROADCAST_ID)
-  {
-    for (uint8_t id = 0; id < DXL_BROADCAST_ID; id++)
-    {
-      if (dxl.ping(id))
-      {
-        DEBUG_SERIAL.printf("ID (%3d), Model: %3d\n", id, dxl.getModelNumber(id));
-        dynaList.push_back(id);
-        // um den MODE zu setzen muss vorher TORQUE deaktiviert werden
-        dxl.torqueOff(id);
-        dxl.setOperatingMode(id, opMode);
-        // um den Servo zu bewegen muss TORQUE wieder aktiviert werden
-        dxl.torqueOn(id);
-      }
+bool scanDynamixels() {
+  size_t s = ARRAY_SIZE(dxl_ids_steering);
+  bool found = true;
+  for (uint8_t id=0; id < s; id++) {
+    // Steering Servos
+    if (dxl_ids_steering[id] > 0 && dxl.ping(dxl_ids_steering[id])) {
+      DEBUG_SERIAL.printf("STEERING-Servo ID:(%2d) MODE: (%d) MODEL:(%3d)\n", 
+        dxl_ids_steering[id], OP_POSITION, dxl.getModelNumber(id));
+      dxl.torqueOff(id); // Torque abschalten um den Mode zu setzen
+      dxl.setOperatingMode(id, OP_POSITION);
+      dxl.torqueOn(id);  // Troque wieder aktivieren um den Servo nutzen zu können
     }
-    DEBUG_SERIAL.printf("Number of Dynamixels found: {%3d}\n", dynaList.size());
+    else {
+      if (dxl_ids_steering[id] == 0) continue;
+      DEBUG_SERIAL.printf("STEERING-Servo ID:(%2d) Servo not found - error - check dxl_ids_steering\n", 
+        dxl_ids_steering[id]);
+      found = false;
+
+    }
+    // Antriebsservos
+    if (dxl_ids_velocity[id] > 0 && dxl.ping(dxl_ids_velocity[id])) {
+      DEBUG_SERIAL.printf("VELOCITY-Servo ID:(%2d) MODE: (%d) MODEL:(%3d)\n", 
+        dxl_ids_velocity[id], OP_VELOCITY, dxl.getModelNumber(id));
+      dxl.torqueOff(id); // Torque abschalten um den Mode zu setzen
+      dxl.setOperatingMode(id, OP_VELOCITY);
+      dxl.torqueOn(id);  // Troque wieder aktivieren um den Servo nutzen zu können
+    }
+    else {
+      if (dxl_ids_velocity[id] == 0) continue;
+      DEBUG_SERIAL.printf("VELOCITY-Servo ID:(%2d) Servo not found - error - check dxl_ids_velocity\n", 
+        dxl_ids_velocity[id]);
+      found = false;
+
+    }
   }
+  return found;
+}
+
+/**
+ * @brief Setzt für jeden Antriebsstrang den Servo auf die Ausgangsstellung
+ * Schritt 1 : Servo auf 150°, dann für den jeweiligen Antriebsstrang in seine Postion
+ * für vorwärts/rückwärts
+ * 
+ */
+void goStartPosition() {
+  size_t s = ARRAY_SIZE(dxl_ids_steering);
+  for (uint8_t id=0; id < s; id++) {
+    // Fahre Servo in die Mittelposition - langsam
+    if (dxl_ids_steering[id] == 0) continue;
+    DEBUG_SERIAL.printf("ID(%2d) move to center....\n", dxl_ids_steering[id]);
+    setAngle(&dxl, 
+        dxl_ids_steering[id],
+        dxl_id_steering_range[id][3], 
+        dxl_id_steering_range[id][0], 
+        dxl_id_steering_range[id][1], 
+        UNIT_DEGREE,
+        100
+    );
+  }
+  delay(5000);
+  for (uint8_t id=0; id < s; id++) {
+    // Fahre Servo in die Startposition (max beschleunigung)
+    if (dxl_ids_steering[id] == 0) continue;
+    DEBUG_SERIAL.printf("ID(%2d) move to start pos (%3.1.f)°...\n", dxl_ids_steering[id],dxl_id_steering_range[id][2]);
+    setAngle(&dxl, 
+      dxl_ids_steering[id], dxl_id_steering_range[id][2], 
+      dxl_id_steering_range[id][0], 
+      dxl_id_steering_range[id][1], 
+      UNIT_DEGREE,
+      0 
+    );
+  }
+
 }
 
 /**

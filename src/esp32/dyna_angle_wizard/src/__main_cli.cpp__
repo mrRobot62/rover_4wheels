@@ -1,0 +1,424 @@
+#include <Dynamixel2Arduino.h>
+
+//---------------------------------------------------------------------
+// 2025-02-24
+//
+//
+// IRGENDWIE läuft das ganze nicht - hab nicht die Muse mich damit weiter zu beschäftigen
+
+// Dyna-Angle-Wizard
+//
+// Alle Servos sind ohne Torque und können bewegt werden.
+// Wärend der Bewegung wird im Terminal die aktuelle Grad und der dazugehörige
+// RAW-Wert angezeigt.
+// 
+// jeder Steering-Servo (VL, VR, HL, HR) muss auf mehrere Position gebracht werden
+// Einstellungen merken und später in der firmware des Rovers speichern
+//
+//
+//---------------------------------------------------------------------
+
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+
+
+#define DEBUG_SERIAL Serial
+#define DXL_SERIAL Serial2
+
+#if defined(CONFIG_IDF_TARGET_ESP32)
+#define TX_PIN 17 // GPIO für UART TX
+#define RX_PIN 16 // GPIO für UART RX
+#define DIR_PIN 4 // GPIO zur Steuerung des OE-Pins (HC125)
+#define BOARD_TYPE "ESP32-WROOM"
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#define TX_PIN 17 // GPIO für UART TX
+#define RX_PIN 16 // GPIO für UART RX
+#define DIR_PIN 4 // GPIO zur Steuerung des OE-Pins (HC125)
+#define BOARD_TYPE "ESP32-S3"
+#endif
+
+#define BAUDRATE 1000000 // Dynamixel-Standardbaudrate
+#define DXL_ID_P 14         // Lenkung
+#define DXL_ID_V 7          // Geschwindigkeit
+
+#define MAX_BAUD 1
+// const int32_t baud[MAX_BAUD] = {57600, 115200, 1000000, 2000000, 3000000};
+const int32_t baud[MAX_BAUD] = {1000000};
+
+Dynamixel2Arduino dxl(DXL_SERIAL, DIR_PIN);
+
+int i = 1;
+long last_millis;
+int last_dir_state = HIGH;
+
+#define SPEED_OFFSET 10     // speed von 0-100
+int speed = 0;
+bool dir = false ; // True = CCW, False = CW
+bool dira = false;
+bool dynas_available = false;
+
+#define MAX_SERVOS 4
+
+enum Sector {
+    VL=0,
+    VR=1,
+    HL=2,
+    HR=4
+};
+
+typedef struct {
+    int id;
+    Sector sector;
+} ServoConfig;
+
+ServoConfig servos[MAX_SERVOS] = {
+    {0,VL},
+    {0,VR},
+    {0,HL},
+    {0,HR}
+};
+
+const char* postionnames[]= {"VL", "VR", "HL", "HR"};
+
+#define LINE_BUF_SIZE 32   //Maximum input string length
+#define ARG_BUF_SIZE 32     //Maximum argument string length
+#define MAX_NUM_ARGS 8      //Maximum number of arguments
+
+char line[LINE_BUF_SIZE];
+char args[MAX_NUM_ARGS][ARG_BUF_SIZE];
+bool error_flag = false;
+
+// Prototypen
+int cmd_help();
+int cmd_scan();
+int cmd_position();
+int cmd_angle();
+int cmd_exit();
+
+// Funktionspointer zum Aufruf der jeweiligen Funktion (Command)
+int (*commands_func[])() {
+    &cmd_help,
+    &cmd_scan,
+    &cmd_position,
+    &cmd_angle,
+    &cmd_exit
+};
+
+// list von Commands
+const char* commands_str[] = {
+    "help",
+    "pos",
+    "angle",
+    "exit"
+};
+
+// liste von Sub-commands
+const char* sector_args[] = {
+    "VL", "VR", "HL", "HR",
+    "vl", "vr", "hl", "hr"
+};
+
+int num_commands = sizeof(commands_str) / sizeof(char*);
+
+
+int cmd_exit() {
+    DEBUG_SERIAL.println("CLI beenden");
+    DEBUG_SERIAL.println("Aktuelle Einstellungen:");
+
+
+
+    DEBUG_SERIAL.println("--- bitte reset oder ausschalten");
+    while(true);
+}
+
+int cmd_position() {
+    DEBUG_SERIAL.println("cmd_position() noch nicht implementiert");
+}
+
+int cmd_angle() {
+    DEBUG_SERIAL.println("cmd_position() noch nicht implementiert");
+
+}
+
+/**
+ * @brief führt einen Scan durch und zeigt alle verfügbaren Dynamixel-Servis mit ihrer ID an
+ */
+int cmd_scan() {
+    uint8_t index;
+    bool found = false;
+    DEBUG_SERIAL.println("search .....");
+    for (int8_t protocol = 1; protocol < 2; protocol++)
+    {
+        // Set Port Protocol version. This has to match with DYNAMIXEL protocol version.
+        dxl.setPortProtocolVersion((float)protocol);
+        DEBUG_SERIAL.printf("SCAN PROTOCOL {%0:1.1f}, RX_PIN: {%1:02d}, TX_PIN: {%2:02d}, DIR_PIN: {%3:02d}\n", protocol, RX_PIN, TX_PIN, DIR_PIN);
+        // DEBUG_SERIAL.println(protocol);
+
+        for (index = 0; index < MAX_BAUD; index++)
+        {
+            // Set Port baudrate.
+            DEBUG_SERIAL.print("SCAN BAUDRATE ");
+            DEBUG_SERIAL.println(baud[index]);
+            dxl.begin(baud[index]);
+
+            for (int id = 0; id < DXL_BROADCAST_ID; id++)
+            {
+                // iterate until all ID in each buadrate is scanned.
+                if (dxl.ping(id))
+                {
+                    DEBUG_SERIAL.print("ID : ");
+                    DEBUG_SERIAL.print(id);
+                    DEBUG_SERIAL.print(", Model Number: ");
+                    DEBUG_SERIAL.print(dxl.getModelNumber(id));
+                    DEBUG_SERIAL.println();
+                    found = true;
+                    dxl.torqueOff(id);
+  
+                }
+            }
+        }
+    }
+    DEBUG_SERIAL.println("search finished.............");
+    return found;
+}
+
+/**
+ * @brief allgemeine Hilfe
+ */
+void help_help() {
+    DEBUG_SERIAL.println("Folgende Commands stehen zur Verfügung");
+    for (int i=0; i < num_commands; i++) {
+        DEBUG_SERIAL.print("  ");
+        DEBUG_SERIAL.println(commands_str[i]);
+    }
+    DEBUG_SERIAL.println("");
+    DEBUG_SERIAL.println("Beispiel: \"help pos\" für mehr Infos zum Modul Position");
+
+}
+
+void help_scan() {
+    DEBUG_SERIAL.println("Führt einen Scan durch und zeigt alle gefunden Dynamixels an");
+}
+
+/**
+ * @brief Hilfe für Positions-Erfassung
+ */
+void help_position() {
+    DEBUG_SERIAL.println("*********************************");
+    DEBUG_SERIAL.println(" HELP Position");
+    DEBUG_SERIAL.println("*********************************");
+    DEBUG_SERIAL.println("");
+    DEBUG_SERIAL.println("DynamixelID mit Position verbinden");
+    DEBUG_SERIAL.println("Positionen: "); 
+    DEBUG_SERIAL.println("   VL (vorne links), VR(vorne rechts");
+    DEBUG_SERIAL.println("   HL (hinten links), HR(hinten rechts)");
+    DEBUG_SERIAL.println("");
+    DEBUG_SERIAL.println("Eingabe: \"pos <id> <position>\" ");
+    DEBUG_SERIAL.println("Beispiel: \"pos 18 VL \"");
+}
+
+/**
+ * @brief Hilfe für Positions-Erfassung
+ */
+void help_angle() {
+    DEBUG_SERIAL.println("DynamixelID und Winkel definieren");
+}
+
+/**
+ * @brief Command help auswerten
+ */
+int cmd_help() {
+
+    if (args[1] == NULL) {
+        help_help();
+    } else if (strcmp(args[1], commands_str[0]) == 0) {
+        help_scan();
+    } else if (strcmp(args[1], commands_str[1]) == 0) {
+        help_position();
+    } else if (strcmp(args[1], commands_str[2]) == 0) {
+        help_angle();
+    }
+    return 0;
+}
+
+/**
+ * @brief CLI initialisieren
+ */
+void cli_init() {
+    DEBUG_SERIAL.println("-----------------------------------------------------------");
+    DEBUG_SERIAL.println(" DYNA-ANGLE-Wizard");
+    DEBUG_SERIAL.println(" Rad-Winkel vermessen und einstellen");
+    DEBUG_SERIAL.println("-----------------------------------------------------------");
+    help_help();
+}
+
+/**
+ * @brief Über die serielle Schnittstelle eine User-Eingabe lesen und auswerten
+ */
+void read_line() {
+    String line_string;
+    while (!Serial.available());
+    if (Serial.available()) {
+        line_string = Serial.readStringUntil('\n');
+        if (line_string.length() < LINE_BUF_SIZE) {
+            line_string.toCharArray(line, LINE_BUF_SIZE);
+            DEBUG_SERIAL.printf("DBG: read_line '%s' \n", line);
+            DEBUG_SERIAL.println(line_string);
+        } else {
+            DEBUG_SERIAL.println("Eingabe zu lang");
+            error_flag = true;
+        }
+    }
+}
+
+/**
+ * @brief Eine Eingabezeile wird zerlegt und geprüft was übergeben wurde
+ * wenn ein 
+ */
+void parse_line() {
+    char *argument;
+    int counter = 0;
+    argument = strtok(line, " ");
+    DEBUG_SERIAL.printf("DBG: parse_line '%s'\n", line);
+
+    while ((argument != NULL)) {
+        if (counter < MAX_NUM_ARGS) {
+            if (strlen(argument) < ARG_BUF_SIZE) {
+                strncpy(args[counter], argument, ARG_BUF_SIZE - 1);
+                DEBUG_SERIAL.printf("DBG: parse_line '%s' - argument:'%s' \n", line, args[counter]);
+                argument = strtok(NULL, " ");
+                counter++;
+            } else {
+                DEBUG_SERIAL.println("Eingabe zu lang");
+                error_flag = true;
+                break;
+            }
+        } else {
+            break;
+        }
+    }
+}
+
+int execute() {
+    for (int i=0; i < num_commands; i++) {
+        DEBUG_SERIAL.printf("DBG: execute args[0]'%s' - commands_str[%d]:'%s' \n", args[0], i, commands_str[i]);
+
+        if (strcmp(args[0], commands_str[i])== 0) {
+            return (*commands_func[i])();
+        }
+    }
+
+    DEBUG_SERIAL.println("Ungültiges Kommando. Nutze \"help\" für Hilfe");
+    return 0;
+}
+
+
+void roverCLI() {
+    Serial.print("> ");
+    read_line();
+    if (!error_flag) {
+        parse_line();
+    }
+    if (!error_flag) {
+        execute();
+    }
+
+    memset(line, 0, LINE_BUF_SIZE);
+    memset(args, 0, sizeof(args[0][0]) * MAX_NUM_ARGS * ARG_BUF_SIZE);
+}
+
+void setup()
+{
+    DEBUG_SERIAL.begin(115200);
+    while (!DEBUG_SERIAL)
+        ; // DEBUG_SERIAL until the serial port is opened
+
+    // DIR_PIN konfigurieren
+    pinMode(DIR_PIN, OUTPUT);
+    digitalWrite(DIR_PIN, HIGH); // Standard: Empfangsmodus (Buffer hochohmig)
+
+    int8_t index = 0;
+    bool found = false;
+    int8_t found_dynamixel = 0;
+    // DXL_SERIAL.begin(57600, SERIAL_8N1, RX_PIN, TX_PIN);
+    //  Dynamixel-Bibliothek starten
+    delay(2000);
+
+
+    if (!cmd_scan()) {
+        DEBUG_SERIAL.println("No Dynamixels found - restart/reset ESP");
+        while(true) {;}
+    }
+
+    cli_init();
+
+
+}
+
+
+
+void loop() {
+    roverCLI();
+}
+ 
+
+
+
+// if (!dynas_available) {
+//     if (millis() - last_millis > 3000) {
+//         DEBUG_SERIAL.println("No Dynamixel servos found");
+//         last_millis = millis();
+//     }
+// }
+// else {
+//     for (uint8_t i=0; i < ARRAY_SIZE(dxl_ids_velocity); i++) {
+//         bool printing = false;
+//         if (dxl_ids_velocity[i] > 0) {
+//             currentVelocity[i] = dxl.getPresentVelocity(dxl_ids_velocity[i]);
+//             DEBUG_SERIAL.printf("| VELOCITY -> ID(%02d) - Velocity (%04d)", dxl_ids_velocity[i], currentVelocity[i]);
+//             printing = true;
+//         }
+//         if (dxl_ids_steering[i] > 0) {
+//             currentSteering[i] = dxl.getPresentPosition(dxl_ids_steering[i]);
+//             DEBUG_SERIAL.printf("| STEERING -> ID(%02d) - Position (%04d)", dxl_ids_steering[i], currentSteering[i]);
+//             printing = true;
+//         }
+//         if (printing) DEBUG_SERIAL.printf(" ---- Speed (%03d) Angle(%03.2f) \n", speed, angle);
+//     }
+
+//     if (millis() - last_millis > 1000) {
+//         if (dir) {
+//             speed += SPEED_OFFSET;
+//             if (speed >= 100 ) dir = false;
+//         }
+//         else {
+//             speed -= SPEED_OFFSET;
+//             angle - ANGLE_OFFSET;
+//             if (speed <= -100 ) dir = true;
+//         }
+
+//         if (dira) {
+//             angle += ANGLE_OFFSET;
+//             if (angle >= angle_range[1]) {
+//                 dira = false;
+//             }
+//         }
+//         else {
+//             angle -= ANGLE_OFFSET;
+//             if (angle <= angle_range[0]) {
+//                 dira = true;
+//             }
+
+//         }
+
+//         for (uint8_t i=0; i < ARRAY_SIZE(dxl_ids_velocity);i++) {
+//             if (dxl_ids_velocity[i] > 0) {
+//                 setSpeed(dxl_ids_velocity[i], speed);
+//             }
+//             if (dxl_ids_steering[i] > 0) {
+//                 setAngle(dxl_ids_steering[i], angle, angle_range[0], angle_range[1]);
+//             }
+//         }
+//         last_millis = millis();
+//     }
+//     delay(250);
+// }
