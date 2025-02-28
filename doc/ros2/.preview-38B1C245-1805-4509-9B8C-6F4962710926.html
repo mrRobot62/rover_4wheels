@@ -1,0 +1,1312 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" "http://www.w3.org/TR/2001/REC-MathML2-20010221/dtd/xhtml-math11-f.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<style type="text/css">body { font: 12px Menlo-Regular, Helvetica Neue, Helvetica, Palatino, Georgia, serif; margin: 80px 0; text-align: justify; }
+h1, h2, h3, h4, h5, h6 { text-align: left; }
+pre, code { font-family: Menlo, "Lucida Console", "Consolas", "Menlo", "Monaco", "Courier", monospace; }#content { max-width: 595.0px; padding: 0.0px 51.0px; }
+
+@font-face {
+    font-family: 'New York';
+    src: local('New York Semibold');
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: 'New York';
+    src: local('New York Semibold');
+    font-weight: bold;
+    font-style: oblique;
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    src: local('Avenir Next Demi Bold');
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    src: local('Avenir Next Demi Bold');
+    font-weight: bold;
+    font-style: oblique;
+}
+
+/* Common CSS. No colors here, just layout. */
+
+html
+{
+    /* scroll-behavior: smooth;*/
+    -webkit-font-smoothing: antialiased;
+}
+
+body
+{
+	width: 99.9%;
+	padding: 0;
+	border: 0;
+	line-height: 1.8em;
+	word-wrap: break-word;
+}
+
+#content
+{
+	margin: 0 auto;
+}
+
+/* Disable margin for the very first element in the tree. */
+#content > *
+{
+    margin-top: 0;
+}
+
+h1, h2, h3, h4, h5, h6
+{
+    text-rendering: optimizeLegibility;
+    margin: 1.5em 0 0.5em 0;
+}
+
+h1
+{
+    font-size:1.5em;
+}
+
+h2
+{
+    font-size:1.3em;
+}
+
+h3
+{
+    font-size:1.2em;
+}
+
+h4, h5, h6
+{
+    font-size:1.0em;
+}
+
+p
+{
+	margin:1em 0 1em 0;
+}
+
+p:last-child
+{
+	margin:0;
+}
+
+hr
+{
+	width: 100%;
+	margin: 3em auto;
+	border: 0;
+	height: 1px;
+}
+
+/* List elements */
+
+ol
+{
+    list-style: inside decimal;
+}
+
+ul
+{
+    list-style: inside disc;
+}
+
+li > ul
+{
+  list-style: inside circle;
+}
+
+li > ul > li > ul
+{
+  list-style: inside square;
+}
+
+ol, ul
+{
+    padding-left:0;
+    margin-bottom:1em;
+}
+
+ol li, ul li
+{
+    margin-left:0;
+    text-align: -webkit-match-parent;
+}
+
+ol:last-child, ul:last-child
+{
+    margin:0;
+}
+
+li > p
+{
+    margin-bottom:0.5em;
+}
+
+li > ol, li > ul
+{
+    margin-top: 0.5em !important;
+    padding-left:2em;
+}
+
+/* Description list elements */
+
+dl
+{
+	margin-bottom:1em;
+}
+
+dl dt
+{
+	font-weight:bold;
+	margin-bottom:0.3em;
+}
+
+dl dd
+{
+	margin-left:0;
+	margin-bottom:0.5em;
+}
+
+dl dd:last-child, dl:last-child
+{
+	margin-bottom:0;
+}
+
+/* Block code */
+
+pre, code
+{
+    white-space: pre;
+}
+
+pre
+{
+	width: 96%;
+    border: 0px;
+    overflow: auto;
+    margin-bottom: 2em;
+    line-height: 1.4em;
+    -webkit-border-radius: 3pt;
+    -moz-border-radius: 3pt;
+    padding: 1em 1.5em;
+    tab-size: 4;
+    text-align: start;
+}
+
+pre > code
+{
+    padding: 0;
+}
+
+code
+{
+    font-size: 85%;
+    padding: 2pt 3pt;
+    -webkit-border-radius: 2pt;
+    -moz-border-radius: 2pt;
+}
+
+/* MD Plugins */
+
+.flowchart, .flow
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent !important;
+}
+
+.mermaid
+{
+    background: transparent !important;
+}
+
+.pieTitleText {
+  font-size: 1.2em !important;
+}
+
+/* Block quotes */
+
+blockquote
+{
+	margin-left: 0;
+	margin-right: auto;
+	width: 96%;
+	padding: 0 0.5em;
+	border-left: 3px solid;
+}
+
+blockquote > *
+{
+    text-align: inherit;
+}
+
+/* Tables */
+
+table
+{
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 1em;
+	border-bottom: 1px solid;
+	border-right: 1px solid;
+	border-spacing: 0;
+}
+
+table th
+{
+	padding: 3px 10px;
+	border-top: 1px solid;
+	border-left: 1px solid;
+}
+
+table td
+{
+	padding: 3px 10px;
+	border-top: 1px solid;
+	border-left: 1px solid;
+}
+
+caption
+{
+    font-size: 1.0em;
+    text-decoration: italic;
+    margin-bottom: 5px;
+}
+
+/* Images */
+
+figure
+{
+	display: block;
+	text-align: center;
+    margin: auto;
+}
+
+img
+{
+	border: none;
+	margin: 1em auto;
+	max-width: 100%;
+}
+
+figcaption
+{
+	font-size: 1.0em;
+	font-style: italic;
+}
+
+mark
+{
+	padding:1px 3px;
+}
+@media screen
+{
+	/* Light theme */
+    
+    body.light_theme
+    {
+        background-color: white;
+        color: #333333;
+    }
+    
+    .light_theme a
+    {
+      color: #139aff;
+    }
+    
+    .light_theme hr
+    {
+      background-color: #E0E0E0;
+    }
+    
+    .light_theme pre, .light_theme code
+    {
+        color: inherit;
+        background-color: #F5F5F5;
+    }
+    
+    .light_theme blockquote
+    {
+        border-color: #7F7F7F;
+        color: #7F7F7F;
+    }
+    
+    .light_theme mark
+    {
+        background-color: yellow;
+    }
+    
+    .light_theme table
+    {
+        border-color: #dddddd;
+    }
+    
+    .light_theme table th
+    {
+        background-color: #eeeeee;
+        border-color: #dddddd;
+    }
+    
+    .light_theme table td
+    {
+        border-color: #dddddd;
+    }
+    
+    .light_theme li.selected
+    {
+        color: #cccccc;
+        text-decoration: line-through;
+        list-style-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMycgaGVpZ2h0PScxMyc+IDxyZWN0IHN0cm9rZT0nI2NjY2NjYycgc3Ryb2tlLXdpZHRoPScwLjUnIHN0cm9rZS1taXRlcmxpbWl0PScxMCcgZmlsbD0nI0ZGRkZGRicgeD0nMC4yNScgeT0nMC4yNScgd2lkdGg9JzEyLjUnIGhlaWdodD0nMTIuNScgcng9JzInIC8+PGcgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNywgNikgcm90YXRlKDQ1KScgZmlsbD0nIzEzOWFmZicgc3Ryb2tlPSdub25lJz48cmVjdCB4PSctMycgeT0nMicgd2lkdGg9JzUnIGhlaWdodD0nMicgcng9JzEnIC8+PHJlY3QgeD0nMCcgeT0nLTMuNScgd2lkdGg9JzInIGhlaWdodD0nNycgcng9JzEnIC8+PC9nPjwvc3ZnPg==");
+    }
+
+    .light_theme li.unselected
+    {
+        list-style-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMycgaGVpZ2h0PScxMyc+IDxyZWN0IHN0cm9rZT0nI2NjY2NjYycgc3Ryb2tlLXdpZHRoPScwLjUnIHN0cm9rZS1taXRlcmxpbWl0PScxMCcgZmlsbD0nI0ZGRkZGRicgeD0nMC4yNScgeT0nMC4yNScgd2lkdGg9JzEyLjUnIGhlaWdodD0nMTIuNScgcng9JzInIC8+PC9zdmc+");
+    }
+    
+    
+    /* Sunset theme */
+    
+    body.sunset_theme
+    {
+        background-color: #F9F3E8;
+        color: #1e1b17;
+    }
+    
+    .sunset_theme a
+    {
+      color: #139aff;
+    }
+    
+    .sunset_theme hr
+    {
+        background-color: #DFCEBA;
+    }
+
+    .sunset_theme pre, .sunset_theme code
+    {
+        color: inherit;
+        background-color: #F2ECE1;
+    }
+
+    .sunset_theme blockquote
+    {
+        border-color: #665B4E;
+        color: #665B4E;
+    }
+    
+    .sunset_theme mark
+    {
+        background-color: khaki;
+    }
+    
+    .sunset_theme table
+    {
+        border-color: #baae9c;
+    }
+    
+    .sunset_theme table th
+    {
+        background-color: #e9e3d8;
+        border-color: #baae9c;
+    }
+    
+    .sunset_theme table td
+    {
+        border-color: #baae9c;
+    }
+    
+    .sunset_theme li.selected
+    {
+        color: #baae9c;
+        text-decoration: line-through;
+        list-style-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMycgaGVpZ2h0PScxMyc+IDxyZWN0IHN0cm9rZT0nbGlnaHRncmF5JyBzdHJva2Utd2lkdGg9JzAuNScgc3Ryb2tlLW1pdGVybGltaXQ9JzEwJyBmaWxsPScjRkZGRkZGJyB4PScwLjI1JyB5PScwLjI1JyB3aWR0aD0nMTIuNScgaGVpZ2h0PScxMi41JyByeD0nMicgLz4gPGcgdHJhbnNmb3JtPSd0cmFuc2xhdGUoNywgNikgcm90YXRlKDQ1KSc+IDxyZWN0IHN0cm9rZT0nbm9uZScgZmlsbD0nIzEzOWFmZicgeD0nLTMnIHk9JzInIHdpZHRoPSc1JyBoZWlnaHQ9JzInIHJ4PScxJyAvPiA8cmVjdCBzdHJva2U9J25vbmUnIGZpbGw9JyMxMzlhZmYnIHg9JzAnIHk9Jy00JyB3aWR0aD0nMicgaGVpZ2h0PSc3JyByeD0nMScgLz4gPC9nPjwvc3ZnPg==");
+    }
+
+    .sunset_theme li.unselected
+    {
+        list-style-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMycgaGVpZ2h0PScxMyc+IDxyZWN0IHN0cm9rZT0nbGlnaHRncmF5JyBzdHJva2Utd2lkdGg9JzAuNScgc3Ryb2tlLW1pdGVybGltaXQ9JzEwJyBmaWxsPScjRkZGRkZGJyB4PScwLjI1JyB5PScwLjI1JyB3aWR0aD0nMTIuNScgaGVpZ2h0PScxMi41JyByeD0nMicgLz4gPC9zdmc+");
+    }
+    
+    
+    /* Dusk theme */
+    
+    body.dusk_theme
+    {
+        background-color: #31353D;
+        color: #EEEFF7;
+    }
+    
+    .dusk_theme a
+    {
+        color: #67cccf;
+    }
+    
+    .dusk_theme hr
+    {
+      background-color: #4E5C6C;
+    }
+    
+    .dusk_theme pre, .dusk_theme code
+    {
+        color: inherit;
+        background-color: #353942;
+    }
+    
+    .dusk_theme blockquote
+    {
+        border-color: #92CDCF;
+        color: #92CDCF;
+    }
+    
+    .dusk_theme mark
+    {
+        background-color: #92CDCF;
+    }
+    
+    .dusk_theme table
+    {
+        border-color: #3f454f;
+    }
+    
+    .dusk_theme table th
+    {
+        background-color: #383d46;
+        border-color: #3f454f;
+    }
+    
+    .dusk_theme table td
+    {
+        border-color: #3f454f;
+    }
+    
+    .dusk_theme li.selected
+    {
+        color: #6C7E7F;
+        text-decoration: line-through;
+        list-style-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMycgaGVpZ2h0PScxMyc+IDxyZWN0IHN0cm9rZT0nIzNmNDU0Zicgc3Ryb2tlLXdpZHRoPScwLjUnIHN0cm9rZS1taXRlcmxpbWl0PScxMCcgZmlsbD0nIzM4M2Q0NicgeD0nMC4yNScgeT0nMC4yNScgd2lkdGg9JzEyLjUnIGhlaWdodD0nMTIuNScgcng9JzInIC8+IDxnIHRyYW5zZm9ybT0ndHJhbnNsYXRlKDcsIDYpIHJvdGF0ZSg0NSknPiA8cmVjdCBzdHJva2U9J25vbmUnIGZpbGw9JyNFQTRDN0QnIHg9Jy0zJyB5PScyJyB3aWR0aD0nNScgaGVpZ2h0PScyJyByeD0nMScgLz48cmVjdCBzdHJva2U9J25vbmUnIGZpbGw9JyNFQTRDN0QnIHg9JzAnIHk9Jy00JyB3aWR0aD0nMicgaGVpZ2h0PSc3JyByeD0nMScgLz48L2c+PC9zdmc+");
+    }
+
+    .dusk_theme li.unselected
+    {
+        list-style-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMycgaGVpZ2h0PScxMyc+PHJlY3Qgc3Ryb2tlPScjM2Y0NTRmJyBzdHJva2Utd2lkdGg9JzAuNScgc3Ryb2tlLW1pdGVybGltaXQ9JzEwJyBmaWxsPScjMzgzZDQ2JyB4PScwLjI1JyB5PScwLjI1JyB3aWR0aD0nMTIuNScgaGVpZ2h0PScxMi41JyByeD0nMicgLz48L3N2Zz4=");
+    }
+    
+    
+    /* Night theme */
+    
+    body.night_theme
+    {
+        background-color: #121212;
+        color: #DFDFDF;
+    }
+    
+    .night_theme a
+    {
+        color: #2cbdf3;
+    }
+    
+    .night_theme hr
+    {
+        background-color: #303030;
+    }
+    
+    .night_theme pre, .night_theme code
+    {
+        color: inherit;
+        background-color: #161616;
+    }
+    
+    .night_theme blockquote
+    {
+        border-color: #878787;
+        color: #878787;
+    }
+    
+    .night_theme mark
+    {
+        background-color: yellow;
+    }
+    
+    .night_theme table
+    {
+        border-color: #2b2b2b;
+    }
+    
+    .night_theme table th
+    {
+        background-color: #222222;
+        border-color: #2b2b2b;
+    }
+    
+    .night_theme table td
+    {
+        border-color: #2b2b2b;
+    }
+    
+    .night_theme li.selected
+    {
+        color: #878787;
+        text-decoration: line-through;
+        list-style-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMycgaGVpZ2h0PScxMyc+PHJlY3Qgc3Ryb2tlPSdub25lJyBzdHJva2UtbWl0ZXJsaW1pdD0nMTAnIGZpbGw9JyMyMjIyMjInIHg9JzAuMjUnIHk9JzAuMjUnIHdpZHRoPScxMi41JyBoZWlnaHQ9JzEyLjUnIHJ4PScyJyAvPjxnIHRyYW5zZm9ybT0ndHJhbnNsYXRlKDcsIDYpIHJvdGF0ZSg0NSknPjxyZWN0IHN0cm9rZT0nbm9uZScgZmlsbD0nIzJjYmRmMycgeD0nLTMnIHk9JzInIHdpZHRoPSc1JyBoZWlnaHQ9JzInIHJ4PScxJyAvPjxyZWN0IHN0cm9rZT0nbm9uZScgZmlsbD0nIzJjYmRmMycgeD0nMCcgeT0nLTQnIHdpZHRoPScyJyBoZWlnaHQ9JzcnIHJ4PScxJyAvPjwvZz48L3N2Zz4=");
+    }
+
+    .night_theme li.unselected
+    {
+        list-style-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMycgaGVpZ2h0PScxMyc+PHJlY3Qgc3Ryb2tlPSdub25lJyBzdHJva2UtbWl0ZXJsaW1pdD0nMTAnIGZpbGw9JyMyMjIyMjInIHg9JzAuMjUnIHk9JzAuMjUnIHdpZHRoPScxMi41JyBoZWlnaHQ9JzEyLjUnIHJ4PScyJyAvPjwvc3ZnPg==");
+    }
+}
+</style>
+<title>Preview HTML</title>
+</head>
+<body class="light_theme">
+<div id="content">
+<h1 id="nutzungvonmicro-roszwischeneinemraspberrypi5undeinemesp32">Nutzung von micro-ROS zwischen einem Raspberry Pi 5 und einem ESP32</h1>
+
+<h2 id="1.einführunginmicro-ros">1. Einführung in micro-ROS</h2>
+
+<h3 id="wasistmicro-ros">Was ist micro-ROS?</h3>
+
+<p>micro-ROS ist eine für Mikrocontroller optimierte Version von ROS2 (Robot Operating System 2). Sie erweitert das ROS2-Ökosystem, indem sie es auf ressourcenbeschränkte eingebettete Systeme bringt. micro-ROS basiert auf <strong>Micro XRCE-DDS</strong>, einem kompakten DDS-Client, der für den Einsatz auf Geräten mit begrenztem Speicher und Rechenleistung entwickelt wurde.</p>
+
+<p>micro-ROS bietet eine standardisierte Möglichkeit zur Kommunikation zwischen Mikrocontrollern und einem ROS2-System. Es ermöglicht Mikrocontrollern, ROS2-Nachrichten zu senden und zu empfangen, wodurch sie vollständig in ein ROS2-Ökosystem integriert werden können.</p>
+
+<h3 id="hauptmerkmalevonmicro-ros">Hauptmerkmale von micro-ROS</h3>
+
+<ul>
+<li><strong>Optimiert für Mikrocontroller:</strong> Kann auf Plattformen wie ESP32, STM32 oder Arduino ausgeführt werden.</li>
+<li><strong>Verwendet DDS für Kommunikation:</strong> Nutzt das DDS-Protokoll, das auch in ROS2 verwendet wird, um eine nahtlose Integration zu gewährleisten.</li>
+<li><strong>Ermöglicht ROS2-Funktionalität auf Embedded-Systemen:</strong> Unterstützung für Topics, Services, Parameter und Actions auf Mikrocontrollern.</li>
+<li><strong>Speichereffizient und Echtzeitfähig:</strong> Läuft mit wenigen Kilobyte RAM und unterstützt Echtzeitkommunikation.</li>
+</ul>
+
+<h3 id="vergleich:ros2vs.micro-ros">Vergleich: ROS2 vs. micro-ROS</h3>
+
+<table>
+<colgroup>
+<col />
+<col />
+<col />
+</colgroup>
+
+<thead>
+<tr>
+	<th> Merkmal </th>
+	<th> ROS2 </th>
+	<th> micro-ROS </th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+	<td> Plattform </td>
+	<td> PCs, SBCs (z. B. Raspberry Pi) </td>
+	<td> Mikrocontroller (z. B. ESP32, STM32) </td>
+</tr>
+<tr>
+	<td> Kommunikation </td>
+	<td> DDS (Data Distribution Service) </td>
+	<td> Micro XRCE-DDS (kompakte DDS-Version) </td>
+</tr>
+<tr>
+	<td> Ressourcenverbrauch </td>
+	<td> Hoch (mehrere MB RAM) </td>
+	<td> Sehr niedrig (wenige KB RAM) </td>
+</tr>
+<tr>
+	<td> Unterstützte Features </td>
+	<td> Vollständige ROS2-Funktionalität </td>
+	<td> Begrenzte ROS2-Funktionalität für Embedded-Systeme </td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="architekturvonmicro-ros">Architektur von micro-ROS</h3>
+
+<p>Ein typisches micro-ROS-Setup besteht aus drei Hauptkomponenten:</p>
+
+<ol>
+<li><strong>micro-ROS-Agent (läuft auf Raspberry Pi 5):</strong> Vermittelt die Kommunikation zwischen dem Mikrocontroller (ESP32) und dem ROS2-Ökosystem.</li>
+<li><strong>micro-ROS-Client (läuft auf ESP32):</strong> Führt ROS2-Knoten auf einem Mikrocontroller aus und kommuniziert mit dem Agenten über UART, WiFi oder Ethernet.</li>
+<li><strong>ROS2-Host (z. B. Raspberry Pi 5 oder PC):</strong> Führt reguläre ROS2-Knoten aus, die mit micro-ROS-Knoten interagieren.</li>
+</ol>
+
+<hr />
+
+<h2 id="2.micro-rosbefehle">2. micro-ROS Befehle</h2>
+
+<p>Hier eine Übersicht der wichtigsten micro-ROS-Befehle:</p>
+
+<table>
+<colgroup>
+<col />
+<col />
+<col />
+<col />
+</colgroup>
+
+<thead>
+<tr>
+	<th> Befehl </th>
+	<th> Beispiel </th>
+	<th> Anwendungsgebiet </th>
+	<th> Erläuterung </th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+	<td> <code>micro_ros_agent serial --dev /dev/ttyUSB0 -b 115200</code> </td>
+	<td> <code>micro_ros_agent serial --dev /dev/ttyUSB0 -b 115200</code> </td>
+	<td> Startet den micro-ROS-Agenten über eine serielle Verbindung. </td>
+	<td> Verwendet, um micro-ROS über eine serielle Verbindung mit dem Host zu verbinden. </td>
+</tr>
+<tr>
+	<td> <code>ros2 topic pub</code> </td>
+	<td> <code>ros2 topic pub /led_toggle std_msgs/msg/Bool '{data: true}'</code> </td>
+	<td> Publish einer Nachricht </td>
+	<td> Sendet eine Nachricht von ROS2 an einen micro-ROS-Knoten. </td>
+</tr>
+<tr>
+	<td> <code>ros2 topic echo</code> </td>
+	<td> <code>ros2 topic echo /sensor_data</code> </td>
+	<td> Abonnement von micro-ROS Nachrichten </td>
+	<td> Zeigt die vom micro-ROS-Client gesendeten Nachrichten an. </td>
+</tr>
+<tr>
+	<td> <code>ros2 service call</code> </td>
+	<td> <code>ros2 service call /reset_motor std_srvs/srv/Empty</code> </td>
+	<td> Serviceaufruf </td>
+	<td> Ruft einen Service auf einem micro-ROS-Node auf. </td>
+</tr>
+<tr>
+	<td> <code>ros2 action send_goal</code> </td>
+	<td> <code>ros2 action send_goal /move_robot my_msgs/action/Move '{x: 5, y: 10}'</code> </td>
+	<td> Actionsteuerung </td>
+	<td> Sendet eine asynchrone Aktion an micro-ROS. </td>
+</tr>
+<tr>
+	<td> <code>ros2 param list</code> </td>
+	<td> <code>ros2 param list /esp32_node</code> </td>
+	<td> Parameterverwaltung </td>
+	<td> Listet alle verfügbaren Parameter eines micro-ROS-Nodes auf. </td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="3.installationvonmicro-rosaufraspberrypi5undesp32">3. Installation von micro-ROS auf Raspberry Pi 5 und ESP32</h2>
+
+<h3 id="3.1installationaufdemraspberrypi5">3.1 Installation auf dem Raspberry Pi 5</h3>
+
+<h4 id="1.ros2aufdemraspberrypi5installieren">1. <strong>ROS2 auf dem Raspberry Pi 5 installieren</strong></h4>
+
+<p>Falls ROS2 noch nicht installiert ist, installiere <strong>ROS2 Jazzy</strong>:</p>
+
+<pre><code class="bash">sudo apt update &amp;&amp; sudo apt upgrade -y
+sudo apt install -y ros-jazzy-ros-base
+</code></pre>
+
+<p>Source das ROS2-Setup:</p>
+
+<pre><code class="bash">echo &quot;source /opt/ros/jazzy/setup.bash&quot; &gt;&gt; ~/.bashrc
+source ~/.bashrc
+</code></pre>
+
+<h4 id="2.micro-ros-agentinstallieren">2. <strong>micro-ROS-Agent installieren</strong></h4>
+
+<pre><code class="bash">sudo apt install python3-pip
+pip install micro_ros_agent
+</code></pre>
+
+<p>Starte den micro-ROS-Agenten:</p>
+
+<pre><code class="bash">micro_ros_agent serial --dev /dev/ttyUSB0 -b 115200
+</code></pre>
+
+<hr />
+
+<h2 id="fazit">Fazit</h2>
+
+<p>Mit diesem Setup kann ein <strong>Raspberry Pi 5</strong> ROS2-Commands an einen <strong>ESP32</strong> senden, der <strong>Motoren und LEDs</strong> steuert. Der Gamepad-Controller ermöglicht dabei die einfache Steuerung.</p>
+
+<p>🚀 <strong>ROS2 trifft Embedded-Systeme – Willkommen in der Zukunft der Robotik!</strong></p>
+
+</div>
+<script id='rootVars'>
+const gResourcePath = '/Applications/iWriter Pro.app/Contents/Resources';
+const gAppTheme = 'light_theme';
+</script>
+<script id='loadMathJax'>
+let gScaleValue = 1.0;
+let gTagsSide = 'left';
+let gShowTags = 'none';
+let gMathJaxOutput = 'chtml';
+
+/* Setup and load MatJax lib.  */
+
+window.MathJax = {
+    svg: {
+            scale: gScaleValue,            // global scaling factor for all expressions
+            minScale: .5,                  // smallest scaling factor to use
+            mtextInheritFont: false,       // true to make mtext elements use surrounding font
+            merrorInheritFont: true,       // true to make merror text use surrounding font
+            mathmlSpacing: false,          // true for MathML spacing rules, false for TeX rules
+            skipAttributes: {},            // RFDa and other attributes NOT to copy to the output
+            exFactor: .5,                  // default size of ex in em units
+            displayAlign: 'center',        // default for indentalign when set to 'auto'
+            displayIndent: '0',            // default for indentshift when set to 'auto'
+            fontCache: 'local',            // or 'global' or 'none'
+            localID: null,                 // ID to use for local font cache (for single equation processing)
+            internalSpeechTitles: false,   // insert <title> tags with speech content
+            titleID: 0                     // initial id number to use for aria-labeledby titles
+        },
+    chtml: {
+            scale: gScaleValue,                      // global scaling factor for all expressions
+            minScale: .5,                  // smallest scaling factor to use
+            mtextInheritFont: false,       // true to make mtext elements use surrounding font
+            merrorInheritFont: true,       // true to make merror text use surrounding font
+            mathmlSpacing: false,          // true for MathML spacing rules, false for TeX rules
+            skipAttributes: {},            // RFDa and other attributes NOT to copy to the output
+            exFactor: .5,                  // default size of ex in em units
+            displayAlign: 'center',        // default for indentalign when set to 'auto'
+            displayIndent: '0',            // default for indentshift when set to 'auto'
+            matchFontHeight: true,         // true to match ex-height of surrounding font
+            adaptiveCSS: true              // true means only produce CSS that is used in the processed equations
+      },
+    tex: {
+            tags: gShowTags,
+            tagSide: gTagsSide,          // side for \tag macros
+            tagIndent: '0.8em'           // amount to indent tags
+        },
+    options: {
+            processHtmlClass: 'math',  //  class that marks tags that should be searched
+            renderActions: {
+            assistiveMml: [],
+            addMenu: [0, '', '']
+        }
+    }
+};
+
+(function () {
+    
+    var script = document.createElement('script');
+    
+    // Global vars will be defined at launch
+    // gMathJaxOutput can be 'svg' or 'chtml'
+    script.src = gResourcePath + "/MathJax/tex-" + gMathJaxOutput + ".js";
+
+    script.async = true;
+    script.id = "MathJax-script";
+    document.head.appendChild(script);
+})();
+</script>
+<script id='loadMermaid'>
+
+/* Initialize Mermaid lib. */
+
+function mermaidConfig() {
+  
+    /// Mermaid Theme
+    var mermaidTheme = "default";
+
+    /// gAppTheme is defined in "rootVars" script
+    if (gAppTheme == "dusk_theme" || gAppTheme == "night_theme")
+    {
+        mermaidTheme = "dark";
+    }
+
+    /// Mermaid configuration
+    var config = {
+        startOnLoad: true,
+        theme: mermaidTheme,
+        fontFamily: "-apple-system, Helvetica Neue",
+        fontSize:14,
+        securityLevel:'loose',
+        flowchart:{
+            useMaxWidth:true,
+            htmlLabels:true,
+            fontSize: 16
+        },
+        flowchart: {
+            diagramPadding: 10,
+            htmlLabels: true,
+            curve: 'basis',
+        },
+        gantt: {
+            useMaxWidth:false,
+            fontSize:14
+        },
+        sequence:{
+            useMaxWidth:true,
+            fontSize:16
+        },
+        pie: {
+            useMaxWidth:false
+        },
+    };
+    
+    return config;
+}
+
+(function () {
+    var script = document.createElement('script');
+    script.src = gResourcePath + "/Mermaid/mermaid.min.js";
+    script.async = false;
+    script.id = "Mermaid-script";
+    document.head.appendChild(script);
+    
+    script.onload = function() {
+
+        /// Initialize
+        const config = mermaidConfig();
+        mermaid.initialize(config);
+    }
+})();
+</script>
+
+<script id='loadFlowchart'>
+const gYesText = 'Yes';
+const gNoText = 'No';
+
+/* Initialize Flowchart lib. */
+
+(function () {
+    var script = document.createElement('script');
+    script.src = gResourcePath + "/Flowchart/raphael.min.js"; // gResourcePath will be defined at launch
+    script.async = false;
+    script.id = "Raphael-script";
+    document.head.appendChild(script);
+    
+    var script = document.createElement('script');
+    script.src = gResourcePath + "/Flowchart/flowchart.min.js"; // gResourcePath will be defined at launch
+    script.async = false;
+    script.id = "Flowchart-script";
+    document.head.appendChild(script);
+
+    script.onload = function() {
+      
+        loadFlowchart();
+    }
+})();
+
+loadFlowchart = function() {
+    
+    /// Get styling info
+    const element = document.body;
+    const style = getComputedStyle(element);
+    
+    let options = {
+        //'x':           50,
+        //'maxWidth':    5,
+        'text-margin':   15,
+        'font-size':     16,
+        'line-width':    3,
+        'font':          'normal',
+        'font-family':   '-apple-system, Helvetica Neue, Courier, monospace, serif',
+        'font-weight':   'normal',
+        'font-color':     style.color,
+        'line-color':     style.color,
+        'element-color':  style.color,
+        'fill':           style.background,
+        'yes-text':       gYesText,
+        'no-text':        gNoText,
+        'arrow-end':      'block',
+        'scale':          1.0
+    };
+    
+    /// Draw flowchart
+    function drawChartsWithName(className, options) {
+        
+        let flowchartElements = document.getElementsByClassName(className);
+        
+        for (let index = 0; index < flowchartElements.length; index++) {
+            
+            let element = flowchartElements[index];
+            const code = element.textContent;
+
+            if (code.length > 0) {
+
+                let chart = flowchart.parse(code);
+                element.innerHTML = '';
+                chart.drawSVG(element, options);
+            }
+        }
+    }
+    
+    /// Call flowchart for 2 classes
+    drawChartsWithName('flow', options);
+    drawChartsWithName('flowchart', options);
+};
+</script>
+
+<script id='loadHighlight'>
+
+var script = document.createElement('script');
+script.src = gResourcePath + "/highlight/highlight.min.js"; // gResourcePath will be defined at launch
+script.async = false;
+script.id = "Highlight-script";
+document.head.appendChild(script);
+
+/// Highlight CSS style
+var stylePath = "/highlight/styles/default.min.css";
+
+var theme = gAppTheme;
+
+if (theme == "light_theme")
+{
+    stylePath = "/highlight/styles/xcode.min.css";
+}
+else if (theme == "sunset_theme")
+{
+    stylePath = "/highlight/styles/stackoverflow-light.min.css";
+}
+else if (theme == "dusk_theme")
+{
+    stylePath = "/highlight/styles/harmonic16-dark.min.css";
+}
+else if (theme == "night_theme")
+{
+    stylePath = "/highlight/styles/stackoverflow-dark.min.css";
+}
+
+var link = document.createElement('link');
+link.rel = 'stylesheet';
+link.type = 'text/css';
+link.id = "Highlight-stylesheet";
+link.href = gResourcePath + stylePath; // gResourcePath will be defined at launch
+document.head.appendChild(link);
+
+script.onload = function() {
+  
+    hljs.highlightAll();
+}
+
+</script>
+
+<script id='ScrollSync-script'>
+ 
+function findAnchorNodes() {
+    
+    let excludedSelectors = ".trans-wrapper img, .trans-wrapper .mermaid, .trans-wrapper .flow, .trans-wrapper .flowchart";
+    let excludedElements = Array.prototype.slice.call(document.querySelectorAll(excludedSelectors));
+
+    let selectors = "#content > h1, #content > h2, #content > h3, #content > h4, #content > h5, #content > h6, #content > hr, #content > blockquote, #content > pre, #content > ul, #content > ol, img, .trans-wrapper, div.mermaid, div.flow, div.flowchart";
+    let elements = Array.prototype.slice.call(document.querySelectorAll(selectors));
+
+    return elements.filter(element => !excludedElements.includes(element));
+}
+
+function totalHeight() {
+    
+    let body = document.body;
+    let html = document.documentElement;
+    return Math.max(body.scrollHeight, body.offsetHeight, html.scrollHeight, html.offsetHeight);
+}
+
+/// Easing function from https://github.com/iamdustan/smoothscroll
+var ease = t => 0.5 * (1 - Math.cos(Math.PI * t));
+
+// Easing functions from https://gist.github.com/gre/1650294
+var linear = t => t;
+var easeOutQuad = t => t*(2-t);
+var easeInOutCubic = t => t<.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1;
+
+function smoothScrollTo(yPos, duration = 200) {
+
+    const startY = window.scrollY;
+    const difference = yPos - startY;
+    const startTime = performance.now();
+
+    function step() {
+
+        const progress = (performance.now() - startTime) / duration;
+        const amount = easeOutQuad(progress);
+        window.scrollTo({ top: startY + amount * difference });
+        if (progress < 0.99) {
+            window.requestAnimationFrame(step);
+        }
+    }
+    
+    step();
+}
+
+// Usage example:
+// let lineHeight = parseInt(getStyle('content', 'line-height'), 10);
+function getStyle(el, styleProp) {
+
+    var x = document.getElementById(el);
+
+    if (x.currentStyle)
+        var y = x.currentStyle[styleProp];
+    else if (window.getComputedStyle)
+        var y = document.defaultView.getComputedStyle(x,null).getPropertyValue(styleProp);
+
+    return y;
+}
+
+function scrollToRatio(value, behavior) {
+
+    let viewportOffset = window.pageYOffset;
+    let viewportHeight = window.innerHeight;
+    var offset = totalHeight() * value - viewportHeight/2.0;
+
+    let duration = 200.0;
+
+    if (behavior == 2) // animation behavior: none
+    {
+        window.scrollTo({top: offset, behavior: 'auto'});
+    }
+    else if (behavior == 1) // animation behavior: animated
+    {
+        setTimeout(smoothScrollTo(offset, duration), duration);
+    }
+    else // animation behavior: auto
+    {
+        if (Math.abs(offset - viewportOffset) > 50.0)
+        {
+            setTimeout(smoothScrollTo(offset, duration), duration);
+        }
+        else
+        {
+            window.scrollTo({top: offset, behavior: 'auto'});
+        }
+    }
+}
+
+function scrollToPercentage(value, behavior) {
+
+    let duration = 200.0;
+    let offset = value * totalHeight();
+
+    if (behavior == 2) // animation behavior: none
+    {
+        window.scrollTo({top: offset, behavior: 'auto'});
+    }
+    else if (behavior == 1) // animation behavior: animated
+    {
+        setTimeout(smoothScrollTo(offset, duration), duration);
+    }
+    else // animation behavior: auto
+    {
+        let viewportOffset = window.pageYOffset;
+
+        if (Math.abs(offset - viewportOffset) > 50.0)
+        {
+            setTimeout(smoothScrollTo(offset, duration), duration);
+        }
+        else
+        {
+            window.scrollTo({top: offset, behavior: 'auto'});
+        }
+    }
+}
+
+function scrollToAnchorElementAtIndex(index, behavior, anchorHeight, offset, maxAnchor, percentage) {
+
+    let elements = findAnchorNodes();
+    let len = elements.length;
+
+    if (len != maxAnchor || index > len)
+    {
+        // Anchor counts don't match, use the fallback value
+        scrollToPercentage(percentage, behavior);
+    }
+    else
+    {
+        let element = elements[index];
+        let viewportOffset = window.pageYOffset;
+        let viewportHeight = window.innerHeight;
+        let rect = element.getBoundingClientRect();
+        var y = rect.top + viewportOffset + offset;
+
+        if (element.className == 'trans-wrapper' && rect.height >= viewportHeight) {
+            
+            y += rect.height/2;
+        }
+        
+        let duration = 200.0;
+        
+        if (y < viewportOffset || y > viewportOffset + viewportHeight/2.0) {
+            
+            if (behavior == 2) // animation behavior: none
+            {
+                window.scrollTo({top: y, behavior: 'auto'});
+            }
+            else if (behavior == 1) // animation behavior: animated
+            {
+                setTimeout(smoothScrollTo(offset, duration), duration);
+            }
+            else // animation behavior: auto
+            {
+                if (Math.abs(y - viewportOffset) > 0)
+                {
+                    setTimeout(smoothScrollTo(offset, duration), duration);
+                }
+                else
+                {
+                    window.scrollTo({top: y, behavior: 'auto'});
+                }
+            }
+        }
+    }
+}
+
+function scrollByDelta(delta, textHeight) {
+
+    let ratio = totalHeight() / textHeight;
+
+    window.scrollBy({top: delta*ratio, behavior: 'auto'});
+}
+
+function scrollToAnchorElementAtIndexWithAlignment(index, behavior, alignment, maxAnchor, percentage) {
+
+    let elements = findAnchorNodes();
+    let len = elements.length;
+    
+    if (len != maxAnchor || index >= len)
+    {
+        // Anchor counts don't match, use the fallback value
+        scrollToPercentage(percentage, behavior);
+    }
+    else
+    {
+        let element = elements[index];
+        let animation = (behavior == 2) ? 'auto' : 'smooth';
+        element.scrollIntoView({ behavior: animation, block: alignment });
+    }
+}
+
+function getVisibleAnchorAndOffset(editorAnchorCount) {
+    
+    // Find the visible anchor
+    // Count offset
+    // return data to a caller
+    // Return values are: [anchor index, offset, fallback percentage]
+    
+    /// Index not found constant
+    const IndexNotFound = -1;
+    
+    // Preview total height
+    let height = totalHeight();
+
+    let elements = findAnchorNodes();
+    let viewportOffset = Math.max(window.pageYOffset, 0.0);
+    let viewportHeight = window.innerHeight;
+    var altResult = null;
+    
+    // Preview is at start
+    if (viewportOffset < 30.0) {
+        
+        return [IndexNotFound, 0, 0.0];
+    }
+    
+    // Preview is at end
+    if ((height - (viewportOffset + viewportHeight)) < 50.0) {
+        
+        return [IndexNotFound, 0, 1.0];
+    }
+    
+    // Percentage value
+    let percentage = Math.min(viewportOffset / height, 1.0);
+    
+    // Anchor counts don't match, return the fallback value
+    if (editorAnchorCount != elements.length) {
+        
+        return [IndexNotFound, 0, percentage];
+    }
+
+    /// Try to find the appropriate anchor for smooth scrolling
+    for(let index = 0; index < elements.length; index++) {
+        
+        let item = elements[index];
+        let elementRect = item.getBoundingClientRect();
+        
+        if (elementRect.top >= 0 && elementRect.top <= viewportHeight) {
+
+            // Element is visible in viewport
+            return [index, elementRect.top, percentage];
+        }
+        else if (elementRect.top < 0 && elementRect.bottom > 0) {
+            
+            // Element is partially visible in viewport
+            altResult = [index, elementRect.top, percentage];
+        }
+    }
+    
+    if (altResult != null) {
+        
+        return altResult;
+    }
+    
+    /// Index is not found, return just the scroll percentage
+    return [IndexNotFound, 0, percentage];
+}
+
+function getScrollPercentage() {
+
+    let height = totalHeight();
+    let viewportOffset = window.pageYOffset;
+    let viewportHeight = window.innerHeight;
+    
+    // Preview is at start
+    if (viewportOffset < 30.0) {
+        
+        return 0.0;
+    }
+    
+    // Preview is at end
+    if ((height - (viewportOffset + viewportHeight)) < 50.0) {
+        
+        return 1.0;
+    }
+    
+    // Percentage value
+    return Math.min(viewportOffset / height, 1.0);
+}
+</script>
+
+<script id='reloadImages'>
+/* This script will get all images in the document and return their src attributes. */
+
+function reloadImages() {
+
+    var images = document.getElementsByTagName('img');
+
+    for(var image of images) {
+        
+        // Get the links for non-loaded images
+        if (image.naturalWidth == 0 || !image.complete) {
+
+            // Get the src value
+            let src = image.getAttribute('src');
+
+            // Disable support for images with file-scheme. It causes various issues with export.
+            //if (src.startsWith('file:')) {
+            //    image.src = 'iwriter-img:/' + src.slice(5);
+            //}
+            
+            if (!src.startsWith('http')) {
+            
+                // Add custom scheme to path.
+                // This will make PreviewSchemeHandler to handle the image.
+                image.src = 'iwriter-img:///' + src;
+            }
+        }
+    }
+}
+
+reloadImages();
+</script>
+
+</body>
+</html>
