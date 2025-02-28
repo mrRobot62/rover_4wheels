@@ -11,8 +11,8 @@ Interne Numerierung : **VL=0, VR=1, HL=2, HR=3**
 | Spurweite VL/VR                        | ?mm  | Spurweite vorne und hinten gleich |
 | Spurweite HR/HL                        | ?mm  | Spurweite vorne und hinten gleich |
 | Radstand V + H                         | ?mm  |                                   |
-| Lenkwinkel                             |      | 180°                              |
-|                                        |      |                                   |
+| Lenkwinkel                             |      | 180°                              | 
+| Raddurchmesser mm	| 60mm  |                                   |
 
 ## Grundeinstellung des Rovers - Lenkgeometrie
 | Technische Daten                       | Wert | Info                              |
@@ -23,4 +23,4 @@ Interne Numerierung : **VL=0, VR=1, HL=2, HR=3**
 | Hinten rehts                           | 45°  | Vorwärts/Rückwärts                |
 |                                        |      |                                   |
 
-# 
+# +
