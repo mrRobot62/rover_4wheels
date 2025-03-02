@@ -279,31 +279,30 @@ import math
 
 class Rover4Wheels(Node):
     """
-    ROS2 Node für die Steuerung eines Rovers mit Ackermann-Lenkung.
+    ROS2 Node für die Steuerung eines Rovers mit einer Allrad-Ackermann-Lenkung.
     
     Der Node empfängt `Twist`-Nachrichten über `/cmd_vel`, berechnet die entsprechenden
-    Lenkwinkel und Radgeschwindigkeiten und veröffentlicht sie für die vier Räder.
+    Lenkwinkel und Radgeschwindigkeiten für alle vier Räder und veröffentlicht sie.
     
-    **Mathematische Erklärung der Kurvenfahrt:**
+    Wichtige Eigenschaften:
+    - Alle vier Räder können unabhängig voneinander lenken.
+    - Die vorderen und hinteren Räder haben spiegelbildliche Ausschlagwinkel.
+    - Die Geschwindigkeit der Räder variiert abhängig vom Wendekreisradius.
     
-    - Der Rover besitzt eine Ackermann-Lenkung, bei der die Vorderräder in verschiedenen
-      Winkeln ausgerichtet werden müssen, um ein korrektes Fahrverhalten zu gewährleisten.
-    - Die Berechnung basiert auf dem **Wenderadius** `R`, der durch die Formel bestimmt wird:
-      
-        R = wheelbase / tan(steering_angle)
-      
-    - Die individuellen Lenkwinkel für das innere (`theta_inner`) und äußere (`theta_outer`) Vorderrad
-      werden durch folgende Formeln berechnet:
-      
-        theta_inner = atan(wheelbase / (R - track_width / 2))
-        theta_outer = atan(wheelbase / (R + track_width / 2))
-      
-    - Die Geschwindigkeit der Räder ist abhängig vom Abstand zum Wendekreis:
-      
-        v_inner = v * (R - track_width / 2) / R
-        v_outer = v * (R + track_width / 2) / R
-      
-      wobei `v` die gewünschte lineare Geschwindigkeit ist.
+    Mathematische Grundlage:
+    Die Lenkung erfolgt über Ackermann-Kinematik, wobei die Drehwinkel so berechnet werden,
+    dass die Achsen der Räder auf einen gemeinsamen Wenderadius zeigen.
+    
+    Lenkwinkel-Berechnung:
+    - Der Kurvenradius R hängt von der gewünschten Winkelgeschwindigkeit `angular_z` und der
+      Fahrzeuggeschwindigkeit `linear_x` ab.
+    - Die Winkel der einzelnen Räder werden so berechnet, dass sie zum gemeinsamen Wenderadius zeigen.
+    - Die vorderen und hinteren Räder lenken spiegelbildlich: 
+      - Wenn links vorne CW dreht, dreht sich hinten links CCW.
+    
+    Geschwindigkeit-Berechnung:
+    - Die Geschwindigkeiten der Räder werden anhand des Abstands zum Wendekreismittelpunkt skaliert.
+    - Räder auf der Kurveninnenseite drehen langsamer als Räder auf der Außenseite.
     """
     def __init__(self):
         super().__init__('rover_4wheels')
@@ -333,45 +332,48 @@ class Rover4Wheels(Node):
         )
         
         # Publisher für die Radgeschwindigkeiten und Lenkwinkel
-        self.left_wheel_pub = self.create_publisher(Float32, '/left_wheel_speed', 10)
-        self.right_wheel_pub = self.create_publisher(Float32, '/right_wheel_speed', 10)
-        self.left_steering_pub = self.create_publisher(Float32, '/left_steering_angle', 10)
-        self.right_steering_pub = self.create_publisher(Float32, '/right_steering_angle', 10)
+        self.front_left_steering_pub = self.create_publisher(Float32, '/front_left_steering_angle', 10)
+        self.front_right_steering_pub = self.create_publisher(Float32, '/front_right_steering_angle', 10)
+        self.rear_left_steering_pub = self.create_publisher(Float32, '/rear_left_steering_angle', 10)
+        self.rear_right_steering_pub = self.create_publisher(Float32, '/rear_right_steering_angle', 10)
+        
+        self.front_left_wheel_pub = self.create_publisher(Float32, '/front_left_wheel_speed', 10)
+        self.front_right_wheel_pub = self.create_publisher(Float32, '/front_right_wheel_speed', 10)
+        self.rear_left_wheel_pub = self.create_publisher(Float32, '/rear_left_wheel_speed', 10)
+        self.rear_right_wheel_pub = self.create_publisher(Float32, '/rear_right_wheel_speed', 10)
         
         self.get_logger().info(f'Rover4Wheels gestartet mit track_width={self.track_width}, wheelbase={self.wheelbase}, max_speed={self.max_speed}')
     
     def cmd_vel_callback(self, msg):
         """
         Callback-Funktion für `/cmd_vel`-Nachrichten.
-        Berechnet die Lenkwinkel und Radgeschwindigkeiten basierend auf Ackermann-Kinematik.
+        Berechnet die Lenkwinkel und Radgeschwindigkeiten basierend auf Allrad-Ackermann-Kinematik.
         """
         linear_x = msg.linear.x  # Vorwärts-/Rückwärtsbewegung
         angular_z = msg.angular.z  # Drehbewegung um die Hochachse
         
-        if angular_z == 0:  # Geradeausfahrt
-            left_steering_angle = self.straight_steering_angle
-            right_steering_angle = self.straight_steering_angle
-        else:  # Kurvenfahrt
-            # Berechnung des Wenderadius
+        if angular_z == 0:
+            # Geradeausfahrt: Alle Räder bleiben auf der Mittelposition
+            fl_angle = fr_angle = rl_angle = rr_angle = self.straight_steering_angle
+        else:
+            # Berechnung des Wendekreises
             turning_radius = self.wheelbase / math.tan(math.radians(angular_z * (self.max_steering_angle - self.min_steering_angle) / 2))
             
-            # Berechnung der individuellen Lenkwinkel für das innere und äußere Rad
-            inner_wheel_angle = math.degrees(math.atan(self.wheelbase / (turning_radius - (self.track_width / 2))))
-            outer_wheel_angle = math.degrees(math.atan(self.wheelbase / (turning_radius + (self.track_width / 2))))
-            
-            # Begrenzung auf max/min Lenkwinkel
-            left_steering_angle = max(min(self.straight_steering_angle + inner_wheel_angle, self.max_steering_angle), self.min_steering_angle)
-            right_steering_angle = max(min(self.straight_steering_angle + outer_wheel_angle, self.max_steering_angle), self.min_steering_angle)
+            # Berechnung der Lenkwinkel für alle vier Räder
+            fl_angle = math.degrees(math.atan(self.wheelbase / (turning_radius - self.track_width / 2)))
+            fr_angle = math.degrees(math.atan(self.wheelbase / (turning_radius + self.track_width / 2)))
+            rl_angle = -fl_angle  # Spiegelbildlich
+            rr_angle = -fr_angle  # Spiegelbildlich
         
-        # Berechnung der Radgeschwindigkeiten für Kurvenfahrt
-        left_wheel_speed = linear_x * (turning_radius - (self.track_width / 2)) / turning_radius
-        right_wheel_speed = linear_x * (turning_radius + (self.track_width / 2)) / turning_radius
+        # Veröffentlichung der berechneten Lenkwinkel
+        self.front_left_steering_pub.publish(Float32(data=fl_angle))
+        self.front_right_steering_pub.publish(Float32(data=fr_angle))
+        self.rear_left_steering_pub.publish(Float32(data=rl_angle))
+        self.rear_right_steering_pub.publish(Float32(data=rr_angle))
         
-        # Veröffentlichung der berechneten Werte
-        self.left_wheel_pub.publish(Float32(data=left_wheel_speed))
-        self.right_wheel_pub.publish(Float32(data=right_wheel_speed))
-        self.left_steering_pub.publish(Float32(data=left_steering_angle))
-        self.right_steering_pub.publish(Float32(data=right_steering_angle))
+        self.get_logger().info(f'Cmd_vel erhalten: linear_x={linear_x}, angular_z={angular_z}')
+        self.get_logger().info(f'FL: {fl_angle}°, FR: {fr_angle}°, RL: {rl_angle}°, RR: {rr_angle}°')
+
 
 def main(args=None):
     """
