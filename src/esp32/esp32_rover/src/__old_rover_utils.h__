@@ -122,9 +122,5 @@ void saveAngleLimits(Dynamixel2Arduino *dxl, uint8_t id, uint16_t min=0, uint16_
     dxl->torqueOn(id);
 }
 
-void resetAllServos(Dynamixel2Arduino *dxl) {
-    DEBUG_SERIAL.println("*********************** FACTORY RESET ALL SERVOS *************************");
-    dxl->factoryReset(0xFE, 0x01);
-    delay(1000);
-}
+
 #endif

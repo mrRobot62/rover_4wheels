@@ -1,11 +1,8 @@
 {
 	"folders": [
 		{
-			"path": "."
-		},
-		{
 			"name": "esp32_dyna_wheel_mode",
-			"path": "../esp32_dyna_wheel_mode"
+			"path": "."
 		}
 	],
 	"settings": {
