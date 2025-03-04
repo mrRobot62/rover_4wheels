@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <Dynamixel2Arduino.h>
+#include "DynamicArray.h"
 #include "rover.h"
 #include "rover_utils.h"
 #include <Vector.h>
@@ -23,6 +24,7 @@ bool scanDynamixels();
 void goStartPosition();
 void setWheelSpeed(Dynamixel2Arduino *dxl, uint8_t id, uint16_t speed);
 void testSetRoverVelocity(Dynamixel2Arduino *dxl);
+void testSetRoverServo(Dynamixel2Arduino *dxl);
 
 int8_t dir = 1;
 int speed = -1023;
@@ -30,6 +32,9 @@ int step = 50;
 int count = 1;
 
 #define MAX_SPEED ;
+
+DynamicArray<RoverServo *> velocityServos;
+DynamicArray<RoverServo *> steeringServos;
 
 void setup()
 {
@@ -60,6 +65,18 @@ void setup()
     }
   }
 
+  // vier Wheel-Servos erstellen
+  velocityServos.add(createRoverServo(&dxl, 4, WHEEL, VL));
+  velocityServos.add(createRoverServo(&dxl, 11, WHEEL, VR));
+  velocityServos.add(createRoverServo(&dxl, 3, WHEEL, HL));
+  velocityServos.add(createRoverServo(&dxl, 1, WHEEL, HR));
+
+  // vier Lenk-Servos erstellen
+  velocityServos.add(createRoverServo(&dxl, 8, STEERING, VL, 330, 665, 511, 330));  // ok
+  velocityServos.add(createRoverServo(&dxl, 7, STEERING, VR, 360, 730, 511, 650));  // ok
+  velocityServos.add(createRoverServo(&dxl, 17, STEERING, HL, 330, 775, 511, 660)); // ok
+  velocityServos.add(createRoverServo(&dxl, 18, STEERING, HR, 265, 670, 511, 350)); // ok
+
   goStartPosition();
   DEBUG_SERIAL.println("Steering in Startposition");
 
@@ -78,7 +95,8 @@ void loop()
 {
 
   // delay innerhalb der test-Routine
-  testSetRoverVelocity(&dxl);
+  // testSetRoverVelocity(&dxl);
+  testSetRoverServo(&dxl);
 }
 
 void goStartPosition()
@@ -87,7 +105,7 @@ void goStartPosition()
 
 /**
  * @brief Scannt die Dynamixel-Kette und sucht ob die definierten IDs auch verfügbar sind.
- * Wenn nein liefert die Funktion false zurück. Wurde ein Serve gefunden, wird auch direkt der
+ * Wenn nein liefert die Funktion false zurück. Wurde ein Servo gefunden, wird auch direkt der
  * Mode für diesen Servo gesetzt. OP_VELOCITY (für Antriebsservos), OP_POSITION (für lenkservos)
  *
  */
@@ -98,7 +116,7 @@ bool scanDynamixels()
   for (uint8_t id = 0; id < s; id++)
   {
     // Steering Servos
-    if (dxl_ids_steering[id] > 0 && dxl.ping(dxl_ids_steering[id]))
+    if (dxl_ids_steering[id][0] > 0 && dxl.ping(dxl_ids_steering[id][0]))
     {
       DEBUG_SERIAL.printf("STEERING-Servo ID:(%2d) MODE: (%d) MODEL:(%3d)\n",
                           dxl_ids_steering[id], OP_POSITION, dxl.getModelNumber(id));
@@ -108,11 +126,10 @@ bool scanDynamixels()
     }
     else
     {
-      if (dxl_ids_steering[id] == 0)
-        continue;
-      DEBUG_SERIAL.printf("STEERING-Servo ID:(%2d) Servo not found - error - check dxl_ids_steering\n",
-                          dxl_ids_steering[id]);
+      if (dxl_ids_steering[id][0] == 0)
+        DEBUG_SERIAL.printf("STEERING-Servo ID:(%2d) Servo not found - error - check dxl_ids_steering\n", dxl_ids_steering[id]);
       found = false;
+      continue;
     }
     // Antriebsservos
     if (dxl_ids_velocity[id][0] > 0 && dxl.ping(dxl_ids_velocity[id][0]))
@@ -140,9 +157,9 @@ bool scanDynamixels()
  */
 void testSetRoverVelocity(Dynamixel2Arduino *dxl)
 {
-  uint16_t test_speeds[] = {100, 200, 400, 600, 800, 1023, 0};         // Verschiedene Geschwindigkeitsstufen
+  uint16_t test_speeds[] = {100, 200, 400, 600, 800, 1023, 0};              // Verschiedene Geschwindigkeitsstufen
   float test_gains[] = {0.0, 0.25, 0.5, 0.65, 1.0, -0.25, 0.5, 0.75, -1.0}; // Verstärkungs- und Dämpfungswerte
-  uint8_t test_dirs[] = {1, 0};                                        // Richtung: Vorwärts und Rückwärts
+  uint8_t test_dirs[] = {1, 0};                                             // Richtung: Vorwärts und Rückwärts
 
   for (float gain : test_gains)
   {
@@ -158,5 +175,21 @@ void testSetRoverVelocity(Dynamixel2Arduino *dxl)
         delay(1000); // Kurze Verzögerung, um die Effekte zu beobachten
       }
     }
+  }
+}
+
+void _dumpServo(RoverServo *servo)
+{
+  DEBUG_SERIAL.printf("Servo (%3d), ServoType (%d) SPos (%d)\n",
+                      servo->id,
+                      servo->servo_type,
+                      servo->servo_position);
+}
+
+void testSetRoverServo(Dynamixel2Arduino *dxl)
+{
+  for (auto &vServo : velocityServos)
+  {
+    _dumpServo(vServo);
   }
 }

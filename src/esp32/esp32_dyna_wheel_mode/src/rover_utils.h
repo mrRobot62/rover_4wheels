@@ -6,6 +6,7 @@
 #include "rover.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#define SPEED_MULTIPLIER 1000
 
 // Funktion zur Überprüfung, ob eine ID im Array vorhanden ist
 /**
@@ -27,33 +28,6 @@ uint8_t id_exists(uint8_t id, const uint8_t *array, uint8_t size)
         }
     }
     return 0; // ID nicht gefunden
-}
-
-/**
- * @brief Konvertiert einen Geschwindigkeitswert von 0..100 in einen Geschwindigkeitswert für Dynamixel. CCW 1..1023, CW 1024..2047, 0=stop
- * (aktuell nur UNIT_RAW)
- */
-void setSpeed(Dynamixel2Arduino *dxl, uint8_t id, int value, int min = -100, int max = 100, uint8_t unit = UNIT_RAW)
-{
-    int velocity;
-    if (value > max)
-        value = max;
-    if (value < -min)
-        value = -min;
-
-    if (value == 0)
-    {
-        velocity = 0;
-    }
-    else if (value > 0)
-    {
-        velocity = map(value, 1, max, 1024, 2047);
-    }
-    else
-    {
-        velocity = map(value, -min, -1, 1023, 1);
-    }
-    dxl->setGoalVelocity(id, velocity, UNIT_RAW);
 }
 
 /**
@@ -113,15 +87,15 @@ float getPostionInDegree(Dynamixel2Arduino *dxl, uint8_t id)
 
 void printCurrentAngles(Dynamixel2Arduino *dxl)
 {
-    size_t s = ARRAY_SIZE(dxl_ids_steering);
-    float angle;
-    for (uint8_t id = 0; id < s; id++)
-    {
-        if (dxl_ids_steering[id] == 0)
-            continue;
-        angle = getPostionInDegree(dxl, dxl_ids_steering[id]);
-        DEBUG_SERIAL.printf("SERVO(%02d) - Winkel: (%3.2f)° \n", dxl_ids_steering[id], angle);
-    }
+    // size_t s = ARRAY_SIZE(dxl_ids_steering);
+    // float angle;
+    // for (uint8_t id = 0; id < s; id++)
+    // {
+    //     if (dxl_ids_steering[id] == 0)
+    //         continue;
+    //     angle = getPostionInDegree(dxl, dxl_ids_steering[id]);
+    //     DEBUG_SERIAL.printf("SERVO(%02d) - Winkel: (%3.2f)° \n", dxl_ids_steering[id], angle);
+    // }
 }
 
 /**
@@ -136,13 +110,6 @@ void saveAngleLimits(Dynamixel2Arduino *dxl, uint8_t id, uint16_t min = 0, uint1
     dxl->writeControlTableItem(6, id, min);
     dxl->writeControlTableItem(8, id, max);
     dxl->torqueOn(id);
-}
-
-void resetAllServos(Dynamixel2Arduino *dxl)
-{
-    DEBUG_SERIAL.println("*********************** FACTORY RESET ALL SERVOS *************************");
-    dxl->factoryReset(0xFE, 0x01);
-    delay(1000);
 }
 
 /**
@@ -164,7 +131,7 @@ bool scanAllDynamixels(Dynamixel2Arduino *dxl, uint8_t from = 1, uint8_t to = 25
     {
         if (dxl->ping(id))
         {
-            DEBUG_SERIAL.printf("Serve (%3d) found\n", id);
+            DEBUG_SERIAL.printf("Dynamixel ID: %3d found\n", id);
             found = true;
         }
     }
@@ -181,6 +148,8 @@ bool scanAllDynamixels(Dynamixel2Arduino *dxl, uint8_t from = 1, uint8_t to = 25
  * Verstärkungs- oder Dämpfungswert über GAIN. Wertebereich von -1.0 (Dämpfen) bis +1.0 (Verstärken)
  * Nutzbar um den eigentlichen Geschwindigkeitswert beibehalten und trotzdem die Geschwindigkeit (z.B. in Kurven) anzupassen
  *
+ * Gilt für ALLE Antriebsservos
+ *
  * @param dxl Pointer auf das Dynamixel2Arduino Objekt
  * @param speed Geschwindigkeit zwischen 0-1023
  * @param gain Verstärkung-/Dämpfungsfaktor von -1.0(dämpfen) bis +1.0(Verstärken)
@@ -189,6 +158,7 @@ bool scanAllDynamixels(Dynamixel2Arduino *dxl, uint8_t from = 1, uint8_t to = 25
  */
 void setRoverVelocity(Dynamixel2Arduino *dxl, uint16_t speed, float gain = 0.0, uint8_t dir = 1)
 {
+    uint16_t adjusted_speed;
     if (speed > 1023)
         speed = 1023; // Begrenzung des Speed-Werts
     if (gain < -1.0)
@@ -200,7 +170,6 @@ void setRoverVelocity(Dynamixel2Arduino *dxl, uint16_t speed, float gain = 0.0, 
     {
         uint8_t servo_id = dxl_ids_velocity[i][0];
         uint16_t base_speed = dxl_ids_velocity[i][1];
-        uint16_t adjusted_speed;
 
         // Berechnung des angepassten Geschwindigkeitswerts
         int32_t new_speed = speed + (speed * gain);
@@ -245,6 +214,105 @@ void setRoverVelocity(Dynamixel2Arduino *dxl, uint16_t speed, float gain = 0.0, 
         dxl->setGoalVelocity(servo_id, adjusted_speed, UNIT_RAW);
     }
     DEBUG_SERIAL.println();
+}
+
+/**
+ * @brief speed im Bereich von -1023 bis +1023. Wird intern in 0-1023 und dir 0 oder 1 umgewandelt. Negativ = dir=0, Positiv = dir=1. Gilt für ALLE Antriebsservos
+ */
+void setRoverVelocity(Dynamixel2Arduino *dxl, int speed, float gain = 0.0)
+{
+    if (speed < 0)
+    {
+        setRoverVelocity(dxl, abs(speed), 0);
+    }
+    else
+    {
+        setRoverVelocity(dxl, abs(speed), 1);
+    }
+}
+
+/**
+ * @brief Geschwindigkeit des Rovers für alle Antriebsservos setzen. Werte Bereich von -1.0 bis +1.0 (Gamepad Axis Values)
+ * Die Geschwindigkeit bezieht sich auf Ausgaben des Gamepad-Controllers und wird in den passenden Wertebereich des Dynamixel-Servos
+ * konvertiert.
+ * Verstärkungs- oder Dämpfungswert über GAIN. Wertebereich von -1.0 (Dämpfen) bis +1.0 (Verstärken)
+ * Nutzbar um den eigentlichen Geschwindigkeitswert beibehalten und trotzdem die Geschwindigkeit (z.B. in Kurven) anzupassen.alignas
+ *
+ * Gilt für ALLE Antriebsservos
+ *
+ * @param dxl Dynamixel2Arduino Objekt
+ * @param speed Geschwindigkeitsbereich von -1.0 bis +1.0 (postiv = Forward, negativ = Backward)
+ * @param gain Verstärungs-/Dämpfungsfaktor von -1.0 bis +1.0
+ *
+ */
+void setRoverVelocity(Dynamixel2Arduino *dxl, float speed, float gain = 0.0)
+{
+    uint8_t dir = 1;
+    int adjusted_speed = 0;
+    int s_adj = 0;
+
+    if (speed < -1.0)
+        speed = -1.0;
+    if (speed > 1.0)
+        speed = 1.0;
+    if (gain < -1.0)
+        gain = -1.0;
+    if (gain > 1.0)
+        gain = 1.0;
+
+    s_adj = long(speed * SPEED_MULTIPLIER);
+    //
+    // der Wertebereich von -1.0 bis +1.0 muss nun in einen Wertebereich von -1023 bis +1023 gemapped werden
+    // der Float-Wert wird im mit 1000 multipliziert um eine möglichst gute Linearisierung zu erreichen
+    adjusted_speed = map(s_adj, -SPEED_MULTIPLIER, SPEED_MULTIPLIER, -1023, 1023);
+}
+
+/**
+ * @brief generiert einen RoverServo basieren auf konfigurierte Parameter. Mit einerm Servo-Objkt arbeiten ist einfacher als sich die
+ * Daten permament aus Array auszulesen.alignas
+ *
+ * @param dxl Dynamixel2Arduino Objekt
+ * @param id ID des Servos
+ * @param stype Type des Servos (Steering/Joint oder WHEEL)
+ * @param spos Position des Servosm(entspricht dem ENUM VL/VR/HL/HR)
+ * @param cw_angle Limit Angle CW
+ * @param ccw_angle Limit Angle CCW
+ * @param mid_angle Mittlere Position des Servos
+ * @param start_angle Postion für gerade aus fahren
+ * @param bck_velo Min-Value für Backward Drehen im Wheel-Modus (z.B ab 1024-2047)
+ * @param fwd_velo Min-Value für Forward Drehen im Wheel-Modus (z.B. ab 0-1023)
+ */
+RoverServo *createRoverServo(Dynamixel2Arduino *dxl, uint8_t id, ServoType stype, ServoPosition spos, int cw_angle = 0, int ccw_angle = 1023, int mid_angle = 511, int start_angle = 0, int bck_velo = 1024, int fwd_velo = 0)
+{
+    RoverServo *servo = new RoverServo();
+    if (id > 0)
+    {
+        servo->id = id;
+        servo->servo_type = stype;
+        servo->servo_position = spos;
+        if (stype == ServoType::STEERING)
+        {
+            servo->CW_ANGLE_LIMIT = constrain(cw_angle, 0, 1023);
+            servo->CCW_ANGLE_LIMIT = constrain(ccw_angle, 0, 1023);
+            servo->MID_ANGLE_POSITION = constrain(mid_angle, 0, 1023);
+        }
+        else
+        {
+            servo->CW_ANGLE_LIMIT = 0;
+            servo->CCW_ANGLE_LIMIT = 0;
+            servo->BACKWARD_START_VELOCITY = bck_velo;
+            servo->FORWARD_START_VOLOCITY = fwd_velo;
+        }
+        // speichere im ServoEEPRO ob JOINT oder WHEEL Modus
+        dxl->writeControlTableItem(ControlTableItem::CW_ANGLE_LIMIT, id, servo->CW_ANGLE_LIMIT);
+        dxl->writeControlTableItem(ControlTableItem::CCW_ANGLE_LIMIT, id, servo->CCW_ANGLE_LIMIT);
+    }
+    else
+    {
+        return nullptr;
+    }
+
+    return servo;
 }
 
 #endif
